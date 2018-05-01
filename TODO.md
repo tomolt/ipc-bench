@@ -5,8 +5,10 @@
 - [ ] Search for some more accurate method of measuring time
 - [ ] Plot using gnuplot
 - [ ] include example plots in the readme
+- [ ] Differentiate results by hardware info like OS name and version, CPU model etc.
 - [ ] Accept bug fix(es) pushed to rigtorp/ipc-bench
 - [ ] shared memory
 - [ ] udp latency
+- [ ] process_vm_readv/writev
 - [ ] enet? (optional only)
 - [ ] Windows support?
