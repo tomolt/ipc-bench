@@ -26,6 +26,9 @@
     OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -40,4 +43,60 @@
 #ifndef BENCH_TIMER
 #define BENCH_TIMER BENCH_GETTIMEOFDAY
 #endif
+
+#if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                           \
+    defined(_POSIX_MONOTONIC_CLOCK)
+#define HAS_CLOCK_GETTIME_MONOTONIC
+#endif
+
+typedef enum {
+	BENCH_LATENCY = 'l',
+	BENCH_THROUGHPUT = 't',
+} bench_mode;
+
+#if BENCH_TIMER == BENCH_POSIX_MONOTONIC
+typedef struct timespec bench_tm;
+#else
+typedef struct timeval bench_tm;
+#endif
+
+static inline void bench_time(bench_tm *tm)
+{
+#if BENCH_TIMER == BENCH_POSIX_MONOTONIC
+		if (clock_gettime(CLOCK_MONOTONIC, tm) == -1) {
+			perror("clock_gettime");
+			exit(1);
+		}
+#else
+		if (gettimeofday(tm, NULL) == -1) {
+			perror("gettimeofday");
+			exit(1);
+		}
+#endif
+}
+
+// TODO this doesn't need to return an int64_t.
+static inline int64_t bench_latency(bench_tm start, bench_tm stop, int64_t count)
+{
+	int64_t dsec = stop.tv_sec - start.tv_sec;
+#if BENCH_TIMER == BENCH_POSIX_MONOTONIC
+	int64_t dnsec = stop.tv_nsec - start.tv_nsec;
+#else
+	int64_t dnsec = (stop.tv_usec - start.tv_usec) * 1000;
+#endif
+	int64_t cmb_dnsec = dsec * 1000000000 + dnsec;
+	return cmb_dnsec / (count * 2); // times 2 because we measure entire roundtrips
+}
+
+static inline int64_t bench_throughput(bench_tm start, bench_tm stop, int size, int64_t count)
+{
+	int64_t dsec = stop.tv_sec - start.tv_sec;
+#if BENCH_TIMER == BENCH_POSIX_MONOTONIC
+	int64_t dmysec = (stop.tv_nsec - start.tv_nsec) / 1000;
+#else
+	int64_t dmysec = stop.tv_usec - start.tv_usec;
+#endif
+	int64_t cmb_dmysec = dsec * 1000000 + dmysec;
+	return size * count * 8 / cmb_dmysec; // in Mbit/s
+}
 

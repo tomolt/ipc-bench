@@ -31,12 +31,11 @@
 
 #include <sys/socket.h>
 
-#define SUBJECT "pipe"
+#define SUBJECT "usock"
 
 int main(int argc, char *argv[])
 {
-	int ofds[2];
-	int ifds[2];
+	int fds[2];
 
 	bench_mode mode;
 	int size;
@@ -64,28 +63,23 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (pipe(ifds) == -1) {
-		perror("pipe");
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) == -1) {
+		perror("socketpair");
 		return 1;
 	}
 
 	switch (mode) {
 
 	case BENCH_LATENCY:
-		if (pipe(ofds) == -1) {
-			perror("pipe");
-			return 1;
-		}
-
 		if (!fork()) { /* child */
 			for (i = 0; i < count; i++) {
 
-				if (read(ifds[0], buf, size) != size) {
+				if (read(fds[1], buf, size) != size) {
 					perror("read");
 					return 1;
 				}
 
-				if (write(ofds[1], buf, size) != size) {
+				if (write(fds[1], buf, size) != size) {
 					perror("write");
 					return 1;
 				}
@@ -96,12 +90,12 @@ int main(int argc, char *argv[])
 
 			for (i = 0; i < count; i++) {
 
-				if (write(ifds[1], buf, size) != size) {
+				if (write(fds[0], buf, size) != size) {
 					perror("write");
 					return 1;
 				}
 
-				if (read(ofds[0], buf, size) != size) {
+				if (read(fds[0], buf, size) != size) {
 					perror("read");
 					return 1;
 				}
@@ -117,7 +111,7 @@ int main(int argc, char *argv[])
 	case BENCH_THROUGHPUT:
 		if (!fork()) { /* child */
 			for (i = 0; i < count; i++) {
-				if (read(ifds[0], buf, size) != size) {
+				if (read(fds[1], buf, size) != size) {
 					perror("read");
 					return 1;
 				}
@@ -127,7 +121,7 @@ int main(int argc, char *argv[])
 			bench_time(&start);
 
 			for (i = 0; i < count; i++) {
-				if (write(ifds[1], buf, size) != size) {
+				if (write(fds[0], buf, size) != size) {
 					perror("write");
 					return 1;
 				}
