@@ -74,9 +74,9 @@ int main(int argc, char const *argv[])
 	}
 	
 	// ---- Timing method ----
-#if BENCH_TIMER == BENCH_GETTIMEOFDAY
+#if BMB_TIMER == BMB_GETTIMEOFDAY
 	timer_name = "gettimeofday";
-#elif BENCH_TIMER == BENCH_POSIX_MONOTONIC
+#elif BMB_TIMER == BMB_POSIX_MONOTONIC
 	timer_name = "posix_monotonic";
 #else
 	timer_name = "unknown";
