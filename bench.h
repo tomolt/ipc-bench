@@ -152,10 +152,8 @@ static inline int64_t bmb_throughput(bmb_tm start, bmb_tm stop, int size, int64_
 }
 
 #if BMB_USE_TEMPLATE == 1
-struct S_party;
-typedef struct S_party S_party;
 static char const *S_ident;
-static S_party S_mkparties(int size);
+static void S_mkparties(int size, S_party *p, S_party *c);
 static void S_read(S_party party, char *buf, int size);
 static void S_write(S_party party, char *buf, int size);
 
@@ -165,8 +163,9 @@ int main(int argc, char *argv[])
 	int size;
 	int64_t count;
 	bmb_tm start, stop;
+	S_party p, c;
 	bmb_loadcfg(argc, argv, &mode, &size, &count);
-	S_party parties[2] = S_mkparties(size);
+	S_mkparties(size, &p, &c);
 	char *buf = malloc(size);
 	if (buf == NULL) {
 		perror("malloc");
@@ -176,14 +175,14 @@ int main(int argc, char *argv[])
 	case BMB_LATENCY:
 		if (!fork()) { /* child */
 			for (int64_t i = 0; i < count; i++) {
-				S_read(parties[1], buf, size);
-				S_write(parties[1], buf, size);
+				S_read(c, buf, size);
+				S_write(c, buf, size);
 			}
 		} else { /* parent */
 			bmb_time(&start);
 			for (int64_t i = 0; i < count; i++) {
-				S_write(parties[0], buf, size);
-				S_read(parties[0], buf, size);
+				S_write(p, buf, size);
+				S_read(p, buf, size);
 			}
 			bmb_time(&stop);
 			int64_t latency = bmb_latency(start, stop, count);
@@ -193,12 +192,12 @@ int main(int argc, char *argv[])
 	case BMB_THROUGHPUT:
 		if (!fork()) { /* child */
 			for (int64_t i = 0; i < count; i++) {
-				S_read(parties[1], buf, size);
+				S_read(c, buf, size);
 			}
 		} else { /* parent */
 			bmb_time(&start);
 			for (int64_t i = 0; i < count; i++) {
-				S_write(parties[0], buf, size);
+				S_write(p, buf, size);
 			}
 			bmb_time(&stop);
 			int64_t throughput = bmb_throughput(start, stop, size, count);

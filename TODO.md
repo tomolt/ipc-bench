@@ -1,18 +1,19 @@
-- [ ] Unify common benchmarking code
+- [X] Unify common benchmarking code
 - [ ] Test and compare runs of differing message sizes
 - [ ] Switch from running a fixed amount of iterations to a fixed amount of elapsed time
-- [ ] Make total observation times much longer
-- [ ] Pass options like roundtrip count as environment variables
+- [X] Make total observation times much longer
+- [X] Pass options like roundtrip count as environment variables
 - [ ] Search for some more accurate method of measuring time
 - [ ] Plot using gnuplot
 - [ ] Include example plots in the readme
-- [ ] Differentiate results by hardware info like OS name and version, CPU model etc.
+- [X] Differentiate results by hardware info like OS name and version, CPU model etc.
 - [ ] Accept bug fix(es) pushed to rigtorp/ipc-bench
 - [ ] Output all measurements as .ar archives
 - [ ] Bundle ipc-bench with a simple .ar archive manager
-- [ ] Separate bench subject files from utility executables
+- [X] Separate bench subject files from utility executables
+- [ ] Decouple from the original project by rigtorb, as basically all code has been replaced by now
 - [ ] shared memory
-- [ ] udp latency
+- [ ] udp
 - [ ] process_vm_readv/writev
 - [ ] shm
 - [ ] enet? (optional only)

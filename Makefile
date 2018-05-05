@@ -1,23 +1,25 @@
 
-CFLAGS = -g -Wall -O3 -lrt
+CFLAGS := -g -Wall -O3 -lrt
 
-all: machid \
-	unix_lat unix_thr \
-	tcp_lat tcp_thr \
-	tcp_local_lat tcp_remote_lat \
-	udp_lat
+.PHONY: all subjects tools bench trash clean
 
-bench: all
-	@./bench.sh
+all: subjects tools
+
+subjects:
+	@cd subjects && make
+
+tools:
+	@cd tools && make
+
+bench: subjects tools
+	@tools/bench.sh
 
 trash:
-	rm -f *.l
-	rm -f *.t
+	rm -f *.dl
+	rm -f *.dt
 
 clean:
 	rm -f *~ core
-	rm -f machid
-	rm -f unix_lat unix_thr 
-	rm -f tcp_lat tcp_thr 
-	rm -f tcp_local_lat tcp_remote_lat
-	rm -f udp_lat
+	@cd subjects && make clean
+	@cd tools && make clean
+
