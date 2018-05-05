@@ -2,13 +2,18 @@
 - [ ] Test and compare runs of differing message sizes
 - [ ] Switch from running a fixed amount of iterations to a fixed amount of elapsed time
 - [ ] Make total observation times much longer
+- [ ] Pass options like roundtrip count as environment variables
 - [ ] Search for some more accurate method of measuring time
 - [ ] Plot using gnuplot
-- [ ] include example plots in the readme
+- [ ] Include example plots in the readme
 - [ ] Differentiate results by hardware info like OS name and version, CPU model etc.
 - [ ] Accept bug fix(es) pushed to rigtorp/ipc-bench
+- [ ] Output all measurements as .ar archives
+- [ ] Bundle ipc-bench with a simple .ar archive manager
+- [ ] Separate bench subject files from utility executables
 - [ ] shared memory
 - [ ] udp latency
 - [ ] process_vm_readv/writev
+- [ ] shm
 - [ ] enet? (optional only)
 - [ ] Windows support?
