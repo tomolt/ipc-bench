@@ -38,14 +38,6 @@ static char const *S_ident = "tcp";
 
 static void S_mkparties(int size, S_party *p, S_party *c)
 {
-	int fds[2];
-	if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) == -1) {
-		perror("socketpair");
-		exit(1);
-	}
-	*p = fds[0];
-	*c = fds[1];
-
 	// Setup general socket hints and address info
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
@@ -124,4 +116,7 @@ static inline void S_write(S_party p, char *buf, int size)
 		exit(1);
 	}
 }
+
+// TODO probably close connections?
+static void S_teardown(void) {}
 

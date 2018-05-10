@@ -154,6 +154,7 @@ static inline int64_t bmb_throughput(bmb_tm start, bmb_tm stop, int size, int64_
 #if BMB_USE_TEMPLATE == 1
 static char const *S_ident;
 static void S_mkparties(int size, S_party *p, S_party *c);
+static void S_teardown(void);
 static void S_read(S_party party, char *buf, int size);
 static void S_write(S_party party, char *buf, int size);
 
@@ -187,6 +188,7 @@ int main(int argc, char *argv[])
 			bmb_time(&stop);
 			int64_t latency = bmb_latency(start, stop, count);
 			printf("\"%s\"\t%li\n", S_ident, latency);
+			S_teardown(); // TODO probably move teardown into child and let parent wait for exit
 		}
 		return 0;
 	case BMB_THROUGHPUT:
@@ -202,6 +204,7 @@ int main(int argc, char *argv[])
 			bmb_time(&stop);
 			int64_t throughput = bmb_throughput(start, stop, size, count);
 			printf("\"%s\"\t%li\n", S_ident, throughput);
+			S_teardown(); // TODO probably move teardown into child and let parent wait for exit
 		}
 		return 0;
 	}

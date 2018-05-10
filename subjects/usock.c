@@ -61,3 +61,5 @@ static inline void S_write(S_party p, char *buf, int size)
 	}
 }
 
+static void S_teardown(void) {}
+

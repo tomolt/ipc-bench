@@ -1,10 +1,10 @@
 
-CFLAGS := -g -Wall -O3 -lrt -I../
+CFLAGS := -g -Wall -O3 -pthread -lrt -I../
 
 .PHONY: all clean
 
-all: pipe usock tcp
+all: pipe usock tcp shm
 
 clean:
-	rm -f pipe usock tcp
+	rm -f pipe usock tcp shm
 

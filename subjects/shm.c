@@ -1,5 +1,5 @@
 /*
-    Measure latency and throughput of IPC using unix pipes
+    Measure latency and throughput of IPC using unix shm and semaphores
 
 
     Copyright (c) 2018 Thomas Oltmann <thomas.oltmann.hhg@gmail.com>
@@ -26,44 +26,65 @@
     OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <sys/socket.h>
+#include <string.h>
+#include <sys/shm.h>
+// #include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <semaphore.h>
+
+typedef struct { sem_t s; char b[]; } unidir;
 
 #define BMB_USE_TEMPLATE 1
-typedef struct { int r, w; } S_party;
+typedef struct { unidir *r, *w; } S_party;
 #include "bench.h"
 
-static char const *S_ident = "pipe";
+static char const *S_ident = "shm";
+
+static char const *SHMID = "ipc_bench_shm";
+
+static int shm_fd;
 
 static void S_mkparties(int size, S_party *p, S_party *c)
 {
-	int p2c[2], c2p[2];
-	if (pipe(p2c) == -1) {
-		perror("pipe");
+	shm_fd = shm_open(SHMID, O_CREAT | O_RDWR, 0666);
+	if (shm_fd == -1) {
+		perror("shm_open");
 		exit(1);
 	}
-	if (pipe(c2p) == -1) {
-		perror("pipe");
+	int const udirsz = sizeof(unidir) + size;
+	if (ftruncate(shm_fd, udirsz * 2) == -1) {
+		perror("ftruncate");
 		exit(1);
 	}
-	*p = (S_party){c2p[0], p2c[1]};
-	*c = (S_party){p2c[0], c2p[1]};
+	char *mapped = mmap(NULL, udirsz * 2, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+	if (mapped == MAP_FAILED) {
+		perror("mmap");
+		exit(1);
+	}
+	unidir *a = (unidir *)mapped, *b = (unidir *)(mapped + udirsz);
+	sem_init(&a->s, 1, 0);
+	sem_init(&b->s, 1, 0);
+	p->r = c->w = a;
+	p->w = c->r = b;
+}
+
+static void S_teardown(void)
+{
+	if (shm_unlink(SHMID) == -1) {
+		perror("shm_unlink");
+		exit(1);
+	}
 }
 
 static inline void S_read(S_party p, char *buf, int size)
 {
-	if (read(p.r, buf, size) != size) {
-		perror("read");
-		exit(1);
-	}
+	sem_wait(&p.r->s);
 }
 
 static inline void S_write(S_party p, char *buf, int size)
 {
-	if (write(p.w, buf, size) != size) {
-		perror("write");
-		exit(1);
-	}
+	memcpy(p.w->b, buf, size);
+	sem_post(&p.w->s);
 }
-
-static void S_teardown(void) {}
 
