@@ -1,3 +1,4 @@
+- [ ] Update README.md
 - [X] Unify common benchmarking code
 - [ ] Test and compare runs of differing message sizes
 - [ ] Switch from running a fixed amount of iterations to a fixed amount of elapsed time
@@ -17,3 +18,6 @@
 - [ ] enet? (optional only)
 - [ ] Windows support?
 - [ ] Monotonic timers on Windows?
+- [ ] Continuous integration?
+- [ ] verification stage?
+- [ ] timeout?
